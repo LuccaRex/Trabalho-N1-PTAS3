@@ -7,11 +7,10 @@ const jwt = require('jsonwebtoken');
 const createUser = async (req, res) => {
     const { name, email, password } = req.body;
     const newpassword = await bcrypt.hash(password, 10);
-    return res.send(newpassword);
     await User.create({
         name: name,
         email: email,
-        password: password
+        password: newpassword
     }).then(() => {
         res.json('O usuário foi criado');
         console.log('O usuário foi criado');
@@ -71,9 +70,12 @@ const authenticatedUser = async (req, res) => {
         const isUserAuthenticated = await User.findOne({
             where: {
                 email:email,
-                password:password
             }
         })
+        if(!isUserAuthenticated){
+            return res.status(401).send('Email ou senha inválidos');
+        }
+        const response = await bcrypt.compare(password, newpassword);
         const token = jwt.sign({
             name: isUserAuthenticated.name,
             email: isUserAuthenticated.email
