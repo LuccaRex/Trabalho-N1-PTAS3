@@ -76,6 +76,7 @@ const authenticatedUser = async (req, res) => {
             return res.status(401).send('Email ou senha inválidos');
         }
         const response = await bcrypt.compare(password, newpassword);
+        if(response == true){
         const token = jwt.sign({
             name: isUserAuthenticated.name,
             email: isUserAuthenticated.email
@@ -83,11 +84,12 @@ const authenticatedUser = async (req, res) => {
             secret.secret, {
             expiresIn: 86400,
         })
-        return res.json({
+        return res.cookie('token', token, { httpOnly: true }).json({
             name: isUserAuthenticated.name,
             email: isUserAuthenticated.email,
             token: token
         });
+    };
     } catch (error) {
         return res.json("Erro de autenticação");
     }
