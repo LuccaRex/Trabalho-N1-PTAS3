@@ -4,7 +4,7 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
-const { expressjwt: expressJWT } = requeire("express-jwt");
+const { expressjwt: expressJWT } = require("express-jwt");
 const cookieParser = require('cookie-parser');
 
 const app = express();
@@ -15,8 +15,6 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(cookieParser());
 
-const routes = require('./routers/routes');
-
 app.use(
     expressJWT({
         secret: process.env.SECRET,
@@ -26,6 +24,8 @@ app.use(
         path: ["/user/authenticate", "/"]
     })
 );
+
+const routes = require('./routers/routes');
 
 app.use(express.json(), routes, cors());
 app.listen(port, () => { console.log(`Run server...${port}`) });

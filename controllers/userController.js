@@ -2,6 +2,7 @@ const User = require('../models/User');
 const secret = require('../config/auth.json');
 const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 
 const createUser = async (req, res) => {
@@ -46,11 +47,12 @@ const updateUser = async (req, res) => {
     const id = parseInt(req.params.id);
     const { name, email, password } = req.body;
     try {
+        const newpassword = await bcrypt.hash(password, 10);
         await User.update(
             {
               name: name,
               email: email,
-              password: password 
+              password: newpassword 
             },
             {
                 where: {
@@ -75,13 +77,13 @@ const authenticatedUser = async (req, res) => {
         if(!isUserAuthenticated){
             return res.status(401).send('Email ou senha inválidos');
         }
-        const response = await bcrypt.compare(password, newpassword);
+        const response = await bcrypt.compare(password, isUserAuthenticated.password);
         if(response == true){
         const token = jwt.sign({
             name: isUserAuthenticated.name,
             email: isUserAuthenticated.email
         },
-            secret.secret, {
+            process.env.SECRET, {
             expiresIn: 86400,
         })
         return res.cookie('token', token, { httpOnly: true }).json({
